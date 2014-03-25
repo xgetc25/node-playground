@@ -11,6 +11,15 @@ if (!filename) {
     throw Error('No target filename was specified.');
 }
 
+var mysql      = require('mysql');
+var db = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : ''
+});
+
+db.connect();
+db.query('use test1');
 
 server = net.createServer(function(connection) {
     var watcher;
@@ -29,11 +38,21 @@ server = net.createServer(function(connection) {
     });
 
     function writeMessage() {
+        var date = new Date();
+
         connection.write(JSON.stringify({
             type: 'changed',
             file: filename,
-            timestamp: Date.now()
+            timestamp: date.getTime()
         }) + '\n');
+
+        var watcherRecord = {
+            filename: filename,
+            datetime: date
+        }
+        db.query('INSERT INTO watcher SET ?', watcherRecord, function(err, result) {
+            // 
+        });
     };
 
 
